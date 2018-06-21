@@ -5,6 +5,9 @@ using SabberStoneCoreAi.POGame;
 using SabberStoneCoreAi.Agent.ExampleAgents;
 using SabberStoneCoreAi.Agent;
 using SabberStoneCoreAi.src.Agent;
+using SabberStoneCoreAi.Meta;
+using SabberStoneCore.Model;
+using System.Collections.Generic;
 
 namespace SabberStoneCoreAi
 {
@@ -21,17 +24,27 @@ namespace SabberStoneCoreAi
 			{
 				StartPlayer = 1,
 				Player1HeroClass = CardClass.MAGE,
-				Player2HeroClass = CardClass.MAGE,
-				FillDecks = true,
-				Logging = false
+				Player2HeroClass = CardClass.SHAMAN,
+				FillDecks = false,
+				Logging = false,
+				Player1Deck = Decks.MiraclePirateRogue,
+				Player2Deck = Decks.AggroPirateWarrior
+				//Player1HeroCard = Cards.FromName("Jaina Proudmore")
 			};
 
-			Console.WriteLine("Setup POGameHandler");
+
+			foreach (Card c in Cards.All)
+			{
+				Console.WriteLine(c.Name);
+			}
+			
+
+			Console.WriteLine("Setup POGameHandlerrrrrrrrrrrrr");
 			AbstractAgent player1 = new ParametricGreedyAgent();
 			AbstractAgent player2 = new FaceHunter();
 			var gameHandler = new POGameHandler(gameConfig, player1, player2, debug:true);
 
-			Console.WriteLine("STARTING GAMEEE");
+			Console.WriteLine("STARTING GAME");
 			//gameHandler.PlayGame();
 			gameHandler.PlayGames(1);
 			GameStats gameStats = gameHandler.getGameStats();
