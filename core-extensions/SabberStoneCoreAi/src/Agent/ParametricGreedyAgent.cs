@@ -23,84 +23,7 @@ namespace SabberStoneCoreAi.src.Agent
 
 		public override PlayerTask GetMove(POGame.POGame poGame)
 		{
-			/*Console.WriteLine("STARTING GET MOVE");
-			List<PlayerTask> options = poGame.CurrentPlayer.Options();
 			
-			PlayerTask bestTask = null;
-			int bestTaskScore = Int32.MinValue;
-			foreach (PlayerTask task in options) {
-				Console.Write("---->POSSIBLE ");
-				printTask(task);
-
-				if (task.HasSource)
-				{
-					Console.WriteLine("HAS SOURCE. SOURCE IS -->" + task.Source);
-				}
-
-				if (task.PlayerTaskType == PlayerTaskType.MINION_ATTACK && task.Target == poGame.CurrentOpponent.Hero)
-				{
-					Console.WriteLine("MINION ATTACKING OPONENT HERO");
-				}
-
-				if (task.HasTarget)
-				{
-					Console.WriteLine("HAS TARGET. TARGET IS -->"+task.Target);
-					Console.WriteLine("HAS TARGET. CARD IS----->" + task.Target.Card.ToString());
-
-				}
-				else {
-					Console.WriteLine("NOT TARGET");
-				}
-
-				
-
-				if (task.PlayerTaskType == PlayerTaskType.PLAY_CARD) {
-					Console.WriteLine("PLAYING CARD");
-				}
-
-				if (task.PlayerTaskType == PlayerTaskType.MINION_ATTACK && task.Target == poGame.CurrentOpponent.Hero) {
-					Console.Write("¡¡¡¡¡¡¡ATTACKING ENEMY HERO!!!!!!!!!");
-					printTask(task);
-					return task;
-				}
-
-				
-				if (task.PlayerTaskType == PlayerTaskType.MINION_ATTACK && task.Target is Minion)
-				{
-					Console.Write("¡¡¡¡¡¡¡¡ATTACKING MINION!!!!!!!!!");
-					printTask(task);
-					return task;
-				}
-
-				int score = 0;
-				if (task.PlayerTaskType != PlayerTaskType.END_TURN)
-				{
-					List<PlayerTask> toSimulate = new List<PlayerTask>();
-					toSimulate.Add(task);
-					Dictionary<PlayerTask, POGame.POGame> simulated = poGame.Simulate(toSimulate);
-					Console.WriteLine("SIMULATION COMPLETE");
-					int score = scoreTask(poGame, simulated[task]);
-				}
-
-				if (score >= bestTaskScore) {
-					bestTask = task;
-					bestTaskScore = score;
-				}
-
-
-				
-			}
-
-			int myManaUsed = poGame.CurrentPlayer.TotalManaSpentThisGame;
-			int myHeroPowerInGame = poGame.CurrentPlayer.NumTimesHeroPowerUsedThisGame;
-			int myCurrentCardsToDraw = poGame.CurrentPlayer.NumCardsToDraw;
-			int enemyMinionsKilled = poGame.CurrentOpponent.NumFriendlyMinionsThatDiedThisTurn;
-			int currentTurn = poGame.Turn;
-
-			Console.WriteLine("TURN: "+currentTurn+" "+ myManaUsed + " "+ myHeroPowerInGame + " "+ myCurrentCardsToDraw + " "+ enemyMinionsKilled);
-			Console.WriteLine("SELECTED TASK TO EXECUTE ");
-			printTask(bestTask);*/
-
 			Console.WriteLine("CURRENT TURN: " + poGame.Turn);
 			KeyValuePair<PlayerTask,double> p = getBestTask(poGame);
 			Console.WriteLine("SELECTED TASK TO EXECUTE HAS A SCORE OF "+p.Value);
@@ -145,18 +68,10 @@ namespace SabberStoneCoreAi.src.Agent
 
 
 
-			/*foreach (Minion m in before.CurrentOpponent.BoardZone.GetAll()) {
-				Console.WriteLine("ENEMY HAS " + m + "(+" + m.Health + ")" + " in Deckzone");
-			}
+			
 
-			foreach (Minion m in after.CurrentOpponent.BoardZone.GetAll())
-			{
-				Console.WriteLine("NOW ENEMY HAS " + m + "(+"+m.Health+")" + " in Deckzone");
-			}*/
-
-			//Console.WriteLine("CALCULATING ENEMY MINIONS");
-			double scoreEnemyMinions = 0;
-			//double scoreEnemyMinions = calculateScoreMinions(before.CurrentOpponent.BoardZone,after.CurrentOpponent.BoardZone);
+			Console.WriteLine("CALCULATING ENEMY MINIONS");			
+			double scoreEnemyMinions = calculateScoreMinions(before.CurrentOpponent.BoardZone,after.CurrentOpponent.BoardZone);
 			Console.WriteLine("CALCULATING MY MINIONS");
 			double scoreMyMinions = calculateScoreMinions(before.CurrentPlayer.BoardZone, after.CurrentPlayer.BoardZone);
 
