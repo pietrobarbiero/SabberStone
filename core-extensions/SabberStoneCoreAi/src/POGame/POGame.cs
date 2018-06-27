@@ -28,8 +28,8 @@ namespace SabberStoneCoreAi.POGame
 
 			if (debug)
 			{
-				Console.WriteLine("Game Board");
-				Console.WriteLine(game.FullPrint());
+				/*Console.WriteLine("Game Board");
+				Console.WriteLine(game.FullPrint());*/
 			}
 		}
 

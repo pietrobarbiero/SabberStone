@@ -33,10 +33,10 @@ namespace SabberStoneCoreAi
 			};
 
 
-			foreach (Card c in Cards.All)
+			/*foreach (Card c in Cards.All)
 			{
 				Console.WriteLine(c.Name);
-			}
+			}*/
 			
 
 			Console.WriteLine("Setup POGameHandlerrrrrrrrrrrrr");
