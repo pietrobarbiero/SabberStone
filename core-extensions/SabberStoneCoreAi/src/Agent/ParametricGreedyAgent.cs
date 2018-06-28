@@ -21,79 +21,102 @@ namespace SabberStoneCoreAi.src.Agent
 			
 		}
 
+		public static string HERO_HEALTH_REDUCED = "HERO_HEALTH_REDUCED";
+		public static string HERO_ATTACK_REDUCED = "HERO_ATTACK_REDUCED";
+		public static string MINION_HEALTH_REDUCED = "MINION_HEALTH_REDUCED";
+		public static string MINION_ATTACK_REDUCED = "MINION_ATTACK_REDUCED";
+		public static string MINION_KILLED = "MINION_KILLED";
+		public static string MINION_APPEARED = "MINION_APPEARED";
+
+		public static string M_HEALTH = "M_HEALTH";
+		public static string M_ATTACK = "M_ATTACK";
+		public static string M_HAS_BATTLECRY = "M_HAS_BATTLECRY";
+		public static string M_HAS_CHARGE = "M_HAS_CHARGE";
+		public static string M_HAS_DEAHTRATTLE = "M_HAS_DEAHTRATTLE";
+		public static string M_HAS_DIVINE_SHIELD = "M_HAS_DIVINE_SHIELD";
+		public static string M_HAS_INSPIRE = "M_HAS_INSPIRE";
+		public static string M_HAS_LIFE_STEAL = "M_HAS_LIFE_STEAL";
+		public static string M_HAS_STEALTH = "M_HAS_STEALTH";
+		public static string M_HAS_TAUNT = "M_HAS_TAUNT";
+		public static string M_HAS_WINDFURY = "M_HAS_WINDFURY";
+		public static string M_RARITY = "M_RARITY";
+		public static string M_MANA_COST = "M_MANA_COST";
+		public static string M_POISONOUS = "M_POISONOUS";		
+
+		public Dictionary<string, double> weights;
+
+
 		public override PlayerTask GetMove(POGame.POGame poGame)
 		{
 			
-			Console.WriteLine("CURRENT TURN: " + poGame.Turn);
+			debug("CURRENT TURN: " + poGame.Turn);
 			KeyValuePair<PlayerTask,double> p = getBestTask(poGame);
-			Console.WriteLine("SELECTED TASK TO EXECUTE HAS A SCORE OF "+p.Value);
-			printTask(p.Key);
-			Console.WriteLine("-------------------------------------");
-			//Console.ReadKey();
+			debug("SELECTED TASK TO EXECUTE "+stringTask(p.Key)+ "HAS A SCORE OF "+p.Value);
+			
+			debug("-------------------------------------");
+			Console.ReadKey();
 
 			return p.Key;
 		}
 
 		//Mejor hacer esto con todas las posibles en cada movimiento
 		public double scoreTask(POGame.POGame before, POGame.POGame after) {
-			double score = 0;
 
-			if (after.CurrentOpponent.Hero.Health <= 0)
+			if (after.CurrentOpponent.Hero.Health <= 0) //Sometimes this crash!
 			{
-				Console.WriteLine("KILLING ENEMY!!!!!!!!");
+				debug("KILLING ENEMY!!!!!!!!");
 				return Int32.MaxValue;
 			}
 			if (after.CurrentPlayer.Hero.Health <= 0)
 			{
-				Console.WriteLine("WARNING: KILLING MYSELF!!!!!");
+				debug("WARNING: KILLING MYSELF!!!!!");
 				return Int32.MinValue;
 			}
 
-			int myDiffHealth = before.CurrentPlayer.Hero.Health - after.CurrentPlayer.Hero.Health;
-			int enemyDiffHealth = before.CurrentOpponent.Hero.Health - after.CurrentOpponent.Hero.Health;
+			debug("CALCULATING ENEMY HEALTH SCORE");
+			double enemyPoints = calculateScoreHero(before.CurrentOpponent,after.CurrentOpponent);
+			debug("CALCULATING MY HEALTH SCORE");
+			double myPoints    = calculateScoreHero(before.CurrentPlayer, after.CurrentPlayer);
+			debug("Enemy points: " + enemyPoints + " My points: " + myPoints);
 
-			
-			score = score + enemyDiffHealth - myDiffHealth;
-
-			int myDiffArmour = before.CurrentPlayer.Hero.Armor - after.CurrentPlayer.Hero.Armor;
-			int enemyDiffArmour = before.CurrentOpponent.Hero.Armor - after.CurrentOpponent.Hero.Armor;
-
-			Console.WriteLine(
-				  before.CurrentPlayer.Hero.Health + "->" + after.CurrentPlayer.Hero.Health + " "
-				+ before.CurrentOpponent.Hero.Health + "->" + after.CurrentOpponent.Hero.Health+ " "
-				+ before.CurrentPlayer.Hero.Armor +"->"+ after.CurrentPlayer.Hero.Armor + " "
-				+ before.CurrentOpponent.Hero.Armor +"->"+ after.CurrentOpponent.Hero.Armor
-				);
-
-
-
-
-			
-
-			Console.WriteLine("CALCULATING ENEMY MINIONS");			
+			debug("CALCULATING ENEMY MINIONS");			
 			double scoreEnemyMinions = calculateScoreMinions(before.CurrentOpponent.BoardZone,after.CurrentOpponent.BoardZone);
-			Console.WriteLine("CALCULATING MY MINIONS");
+			debug("Score enemy minions: " +scoreEnemyMinions);
+			debug("CALCULATING MY MINIONS");
 			double scoreMyMinions = calculateScoreMinions(before.CurrentPlayer.BoardZone, after.CurrentPlayer.BoardZone);
+			debug("Score my minions: " + scoreMyMinions);
+			debug("Final task score" + enemyPoints + ",neg("+ myPoints + ")," + scoreEnemyMinions + ",neg(" + scoreMyMinions+")");
+			return enemyPoints - myPoints + scoreEnemyMinions - scoreMyMinions;
+		}
 
-			return score+scoreMyMinions+scoreEnemyMinions; //CHANGE SIGNS ACCORDINGLY!!!
+		double calculateScoreHero(Controller playerBefore, Controller playerAfter) {
+
+			debug(playerBefore.Hero.Health + "("+playerBefore.Hero.Armor+")/"+playerBefore.Hero.AttackDamage+" --> "+
+				 playerAfter.Hero.Health + "(" + playerAfter.Hero.Armor + ")/" + playerAfter.Hero.AttackDamage
+				);
+			int diffHealth = (playerBefore.Hero.Health + playerBefore.Hero.Armor) - (playerAfter.Hero.Health+playerAfter.Hero.Armor);
+			int diffAttack = (playerBefore.Hero.AttackDamage) - (playerAfter.Hero.AttackDamage);
+			debug("DIFS"+diffHealth + " " + diffAttack);
+			double score = diffHealth * weights[HERO_HEALTH_REDUCED] + diffAttack * weights[HERO_ATTACK_REDUCED];
+			return score;
 		}
 
 		double calculateScoreMinions(SabberStoneCore.Model.Zones.BoardZone before, SabberStoneCore.Model.Zones.BoardZone after) {
 			foreach (Minion m in before.GetAll())
 			{
-				Console.WriteLine("BEFORE "+m + "(+" + m.Health + ")" + "");
+				debug("BEFORE "+stringMinion(m));
 			}
 
 			foreach (Minion m in after.GetAll())
 			{
-				Console.WriteLine("AFTER  " + m + "(+" + m.Health + ")" + "");
+				debug("AFTER  " +stringMinion(m));
 			}
 
 
-			double scoreDamaged = 0;
-			double scoreAttack = 0;
-			double scoreDead = 0;
-			double scorePlayed = 0;
+			double scoreHealthReduced = 0;
+			double scoreAttackReduced = 0; //We should add Divine shield removed?
+			double scoreKilled = 0;
+			double scoreAppeared = 0;
 
 			//Minions modified?
 			foreach (Minion mb in before.GetAll())
@@ -103,18 +126,19 @@ namespace SabberStoneCoreAi.src.Agent
 				{
 					if (ma.Id == mb.Id)
 					{
-						scoreDamaged = scoreDamaged + (mb.Health - ma.Health);
-						Console.WriteLine("Difference in health of " + mb + " is " + (mb.Health - ma.Health));
+						scoreHealthReduced = scoreHealthReduced + weights[MINION_HEALTH_REDUCED]*(mb.Health - ma.Health)*scoreMinion(mb); //Positive points if health is reduced
+						scoreAttackReduced = scoreAttackReduced + weights[MINION_ATTACK_REDUCED]*(mb.AttackDamage - ma.AttackDamage)*scoreMinion(mb); //Positive points if attack is reduced
 						survived = true;
-						scoreAttack = scoreAttack + (mb.AttackDamage - ma.AttackDamage); //CHECK ATTACK DAMAGE
+						
 					}
 				}
 
 				if (survived == false)
 				{
-					Console.WriteLine(mb + " was killed");
-					scoreDead = scoreDead+1; //WHATEVER
+					debug(stringMinion(mb) + " was killed");
+					scoreKilled = scoreKilled + scoreMinion(mb)*weights[MINION_KILLED]; //WHATEVER //Positive points if card is dead
 				}
+
 			}
 
 			//New Minions on play?
@@ -129,23 +153,79 @@ namespace SabberStoneCoreAi.src.Agent
 					}
 				}
 				if (existed == false) {
-					Console.WriteLine(ma + " is NEW!!");
-					scorePlayed = scorePlayed + 1;//WHATEVER
+					debug(stringMinion(ma)+ " is NEW!!");
+					scoreAppeared = scoreAppeared + scoreMinion(ma)*weights[MINION_APPEARED]; //Negative if a minion appeared (below)
 				}
 			}
 
-			return scoreDamaged+scoreAttack+scoreDead+scorePlayed; //CHANGE THESE SIGNS ACCORDINGLY!!!
+			//Think always as positive points if the enemy suffers!
+			return scoreHealthReduced+scoreAttackReduced+scoreKilled-scoreAppeared; //CHANGE THESE SIGNS ACCORDINGLY!!!
 
 		}
 
+		double scoreMinion(Minion m) {
+			//return 1;
+
+			double score = m.Health*weights[M_HEALTH] + m.AttackDamage*weights[M_ATTACK];
+			if (m.HasBattleCry)
+				score = score + weights[M_HAS_BATTLECRY];
+			if (m.HasCharge)
+				score = score + weights[M_HAS_CHARGE];
+			if (m.HasDeathrattle)
+				score = score + weights[M_HAS_DEAHTRATTLE];
+			if (m.HasDivineShield)
+				score = score + weights[M_HAS_DIVINE_SHIELD];
+			if (m.HasInspire)
+				score = score + weights[M_HAS_INSPIRE];
+			if (m.HasLifeSteal)
+				score = score + weights[M_HAS_LIFE_STEAL];
+			if (m.HasTaunt)
+				score = score + weights[M_HAS_TAUNT];
+			if (m.HasWindfury)
+				score = score + weights[M_HAS_WINDFURY];
+
+			
+
+			score = score + m.Card.Cost*weights[M_MANA_COST];
+			score = score + rarityToInt(m.Card) * weights[M_RARITY];
+			if (m.Poisonous) {
+				score = score + weights[M_POISONOUS];
+			}
+			return score;
+
+		}
+
+		public int rarityToInt(SabberStoneCore.Model.Card c) {
+			if (c.Rarity == SabberStoneCore.Enums.Rarity.COMMON)
+			{
+				return 1;
+			}
+			if (c.Rarity == SabberStoneCore.Enums.Rarity.FREE)
+			{
+				return 1;
+			}
+			if (c.Rarity == SabberStoneCore.Enums.Rarity.RARE)
+			{
+				return 2;
+			}
+			if (c.Rarity == SabberStoneCore.Enums.Rarity.EPIC)
+			{
+				return 3;
+			}
+			if (c.Rarity == SabberStoneCore.Enums.Rarity.LEGENDARY)
+			{
+				return 4;
+			}
+			return 0;
+		}
 
 		KeyValuePair<PlayerTask, double> getBestTask(POGame.POGame state) {
 			double bestScore = Double.MinValue;
 			PlayerTask bestTask = null;
 			List<PlayerTask> list  = state.CurrentPlayer.Options();
 			foreach (PlayerTask t in list) {
-				Console.Write("---->POSSIBLE ");
-				printTask(t);
+				debug("---->POSSIBLE "+stringTask(t));
+				
 				double score = 0;
 				POGame.POGame before = state;
 				if (t.PlayerTaskType == PlayerTaskType.END_TURN)
@@ -158,9 +238,9 @@ namespace SabberStoneCoreAi.src.Agent
 					toSimulate.Add(t);
 					Dictionary<PlayerTask, POGame.POGame> simulated = state.Simulate(toSimulate);
 					//Console.WriteLine("SIMULATION COMPLETE");
-					score = scoreTask(state, simulated[t]);
+					score = scoreTask(state, simulated[t]); //Warning: if using tree, avoid overflow with max values!
 				}
-				Console.WriteLine("SCORE " + score);
+				debug("SCORE " + score);
 				if (score >= bestScore)
 				{
 					bestTask = t;
@@ -174,7 +254,30 @@ namespace SabberStoneCoreAi.src.Agent
 
 		public override void InitializeAgent()
 		{
-			
+			debug("INITIALIZING AGENT");
+			this.weights = new Dictionary<string, double>();
+			this.weights.Add(HERO_HEALTH_REDUCED,1);
+			this.weights.Add(HERO_ATTACK_REDUCED, 1);
+			this.weights.Add(MINION_HEALTH_REDUCED, 1);
+			this.weights.Add(MINION_ATTACK_REDUCED, 1);
+			this.weights.Add(MINION_APPEARED, 1);
+			this.weights.Add(MINION_KILLED, 1);
+			this.weights.Add(M_HEALTH, 1);
+			this.weights.Add(M_ATTACK, 1);
+			this.weights.Add(M_HAS_BATTLECRY, 1);
+			this.weights.Add(M_HAS_CHARGE, 1);
+			this.weights.Add(M_HAS_DEAHTRATTLE, 1);
+			this.weights.Add(M_HAS_DIVINE_SHIELD, 1);
+			this.weights.Add(M_HAS_INSPIRE, 1);
+			this.weights.Add(M_HAS_LIFE_STEAL, 1);
+			this.weights.Add(M_HAS_STEALTH, 1);
+			this.weights.Add(M_HAS_TAUNT, 1);
+			this.weights.Add(M_HAS_WINDFURY, 1);
+			this.weights.Add(M_RARITY, 1);
+			this.weights.Add(M_MANA_COST, 1);
+			this.weights.Add(M_POISONOUS, 1);
+
+
 		}
 
 		public override void InitializeGame()
@@ -182,13 +285,22 @@ namespace SabberStoneCoreAi.src.Agent
 			
 		}
 
-		private void printTask(PlayerTask task) {
-			Console.Write("TASK: " + task.PlayerTaskType + " " + task.Source + "----->" + task.Target+" ");
+		private string stringTask(PlayerTask task) {
+			string t = "TASK: " + task.PlayerTaskType + " " + task.Source + "----->" + task.Target;
 			if (task.Target != null)
-				Console.Write(task.Target.Controller.PlayerId);
+				t=t+task.Target.Controller.PlayerId;
 			else
-				Console.Write("No target");
-			Console.Write("\n");
+				t=t+"No target";
+			return t;
+		}
+
+		private string stringMinion(Minion m) {
+			return m+" "+m.AttackDamage+"/"+m.Health;
+		}
+
+		private void debug(string line) {
+			if(true)
+				Console.WriteLine(line);
 		}
 	}
 }

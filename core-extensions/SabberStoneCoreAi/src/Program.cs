@@ -27,8 +27,8 @@ namespace SabberStoneCoreAi
 				Player2HeroClass = CardClass.SHAMAN,
 				FillDecks = false,
 				Logging = false,
-				Player1Deck = Decks.MiraclePirateRogue,
-				Player2Deck = Decks.AggroPirateWarrior
+				Player1Deck = Decks.AggroPirateWarrior,
+				Player2Deck = Decks.MiraclePirateRogue
 				//Player1HeroCard = Cards.FromName("Jaina Proudmore")
 			};
 
