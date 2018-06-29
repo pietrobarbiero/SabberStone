@@ -13,11 +13,16 @@ namespace SabberStoneCoreAi
 {
 	internal class Program
 	{
+		class Individual {
 
+		}
+
+		
 		private static void Main(string[] args)
 		{
+
 			
-			Console.WriteLine("Setup gameConfig");
+			Console.WriteLine("Setup gameConfigaaa");
 
 			//todo: rename to Main
 			GameConfig gameConfig = new GameConfig
@@ -27,9 +32,8 @@ namespace SabberStoneCoreAi
 				Player2HeroClass = CardClass.SHAMAN,
 				FillDecks = false,
 				Logging = false,
-				Player1Deck = Decks.AggroPirateWarrior,
-				Player2Deck = Decks.MiraclePirateRogue
-				//Player1HeroCard = Cards.FromName("Jaina Proudmore")
+				Player1Deck = Decks.RenoKazakusMage,
+				Player2Deck = Decks.MidrangeJadeShaman //RenoKazakusMage
 			};
 
 
@@ -39,14 +43,14 @@ namespace SabberStoneCoreAi
 			}*/
 			
 
-			Console.WriteLine("Setup POGameHandlerrrrrrrrrrrrr");
+			Console.WriteLine("Setup POGameHandler");
 			AbstractAgent player1 = new ParametricGreedyAgent();
-			AbstractAgent player2 = new FaceHunter();
-			var gameHandler = new POGameHandler(gameConfig, player1, player2, debug:true);
+			AbstractAgent player2 = new ParametricGreedyAgent();//FaceHunter();
+			var gameHandler = new POGameHandler(gameConfig, player1, player2, debug:false);
 
-			Console.WriteLine("STARTING GAME");
+			Console.WriteLine("STARTING GAMES");
 			//gameHandler.PlayGame();
-			gameHandler.PlayGames(1);
+			gameHandler.PlayGames(100);
 			GameStats gameStats = gameHandler.getGameStats();
 
 			gameStats.printResults();

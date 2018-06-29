@@ -27,10 +27,12 @@ namespace SabberStoneCoreAi.src.Agent
 		public static string MINION_ATTACK_REDUCED = "MINION_ATTACK_REDUCED";
 		public static string MINION_KILLED = "MINION_KILLED";
 		public static string MINION_APPEARED = "MINION_APPEARED";
+		public static string SECRET_REMOVED = "SECRET_REMOVED";
+		public static string MANA_REDUCED = "MANA_REDUCED";
 
 		public static string M_HEALTH = "M_HEALTH";
 		public static string M_ATTACK = "M_ATTACK";
-		public static string M_HAS_BATTLECRY = "M_HAS_BATTLECRY";
+		//public static string M_HAS_BATTLECRY = "M_HAS_BATTLECRY";
 		public static string M_HAS_CHARGE = "M_HAS_CHARGE";
 		public static string M_HAS_DEAHTRATTLE = "M_HAS_DEAHTRATTLE";
 		public static string M_HAS_DIVINE_SHIELD = "M_HAS_DIVINE_SHIELD";
@@ -54,43 +56,58 @@ namespace SabberStoneCoreAi.src.Agent
 			debug("SELECTED TASK TO EXECUTE "+stringTask(p.Key)+ "HAS A SCORE OF "+p.Value);
 			
 			debug("-------------------------------------");
-			Console.ReadKey();
+			//Console.ReadKey();
 
 			return p.Key;
 		}
 
 		//Mejor hacer esto con todas las posibles en cada movimiento
 		public double scoreTask(POGame.POGame before, POGame.POGame after) {
-
-			if (after.CurrentOpponent.Hero.Health <= 0) //Sometimes this crash!
-			{
-				debug("KILLING ENEMY!!!!!!!!");
-				return Int32.MaxValue;
+			if (after == null) { //There was an exception with the simullation function!
+				return 1; //better than END_TURN, just in case
 			}
-			if (after.CurrentPlayer.Hero.Health <= 0)
-			{
-				debug("WARNING: KILLING MYSELF!!!!!");
-				return Int32.MinValue;
-			}
+			
+				if (after.CurrentOpponent.Hero.Health <= 0)
+				{
+					debug("KILLING ENEMY!!!!!!!!");
+					return Int32.MaxValue;
+				}
+				if (after.CurrentPlayer.Hero.Health <= 0)
+				{
+					debug("WARNING: KILLING MYSELF!!!!!");
+					return Int32.MinValue;
+				}
+			
 
+			//Differences in Health
 			debug("CALCULATING ENEMY HEALTH SCORE");
 			double enemyPoints = calculateScoreHero(before.CurrentOpponent,after.CurrentOpponent);
 			debug("CALCULATING MY HEALTH SCORE");
 			double myPoints    = calculateScoreHero(before.CurrentPlayer, after.CurrentPlayer);
 			debug("Enemy points: " + enemyPoints + " My points: " + myPoints);
 
+			//Differences in Minions
 			debug("CALCULATING ENEMY MINIONS");			
 			double scoreEnemyMinions = calculateScoreMinions(before.CurrentOpponent.BoardZone,after.CurrentOpponent.BoardZone);
 			debug("Score enemy minions: " +scoreEnemyMinions);
 			debug("CALCULATING MY MINIONS");
 			double scoreMyMinions = calculateScoreMinions(before.CurrentPlayer.BoardZone, after.CurrentPlayer.BoardZone);
 			debug("Score my minions: " + scoreMyMinions);
-			debug("Final task score" + enemyPoints + ",neg("+ myPoints + ")," + scoreEnemyMinions + ",neg(" + scoreMyMinions+")");
-			return enemyPoints - myPoints + scoreEnemyMinions - scoreMyMinions;
+			debug("CALCULATING SECRETS");
+
+			//Differences in Secrets
+			double scoreEnemySecrets = calculateScoreSecretsRemoved(before.CurrentOpponent, after.CurrentOpponent);
+			double scoreMySecrets    = calculateScoreSecretsRemoved(before.CurrentPlayer, after.CurrentPlayer);
+
+
+			//Difference in Mana
+			int usedMana = before.CurrentPlayer.RemainingMana - after.CurrentPlayer.RemainingMana;
+			double scoreManaUsed = usedMana * weights[MANA_REDUCED];
+			debug("Final task score" + enemyPoints + ",neg("+ myPoints + ")," + scoreEnemyMinions + ",neg(" + scoreMyMinions+"),S:"+ scoreEnemySecrets+"neg( " +scoreMySecrets+ ") M:neg(:"+scoreManaUsed+")");			
+			return enemyPoints - myPoints + scoreEnemyMinions - scoreMyMinions+ scoreEnemySecrets - scoreMySecrets - scoreManaUsed;
 		}
 
 		double calculateScoreHero(Controller playerBefore, Controller playerAfter) {
-
 			debug(playerBefore.Hero.Health + "("+playerBefore.Hero.Armor+")/"+playerBefore.Hero.AttackDamage+" --> "+
 				 playerAfter.Hero.Health + "(" + playerAfter.Hero.Armor + ")/" + playerAfter.Hero.AttackDamage
 				);
@@ -163,17 +180,25 @@ namespace SabberStoneCoreAi.src.Agent
 
 		}
 
+		double calculateScoreSecretsRemoved(Controller playerBefore, Controller playerAfter) {
+
+			int dif = playerBefore.SecretZone.Count - playerAfter.SecretZone.Count;
+
+			//int dif = playerBefore.NumSecretsPlayedThisGame - playerAfter.NumSecretsPlayedThisGame;
+			return dif * weights[SECRET_REMOVED];
+		}
+
 		double scoreMinion(Minion m) {
 			//return 1;
 
 			double score = m.Health*weights[M_HEALTH] + m.AttackDamage*weights[M_ATTACK];
-			if (m.HasBattleCry)
-				score = score + weights[M_HAS_BATTLECRY];
+			/*if (m.HasBattleCry)
+				score = score + weights[M_HAS_BATTLECRY];*/
 			if (m.HasCharge)
 				score = score + weights[M_HAS_CHARGE];
 			if (m.HasDeathrattle)
 				score = score + weights[M_HAS_DEAHTRATTLE];
-			if (m.HasDivineShield)
+			if (m.HasDivineShield) 
 				score = score + weights[M_HAS_DIVINE_SHIELD];
 			if (m.HasInspire)
 				score = score + weights[M_HAS_INSPIRE];
@@ -238,7 +263,10 @@ namespace SabberStoneCoreAi.src.Agent
 					toSimulate.Add(t);
 					Dictionary<PlayerTask, POGame.POGame> simulated = state.Simulate(toSimulate);
 					//Console.WriteLine("SIMULATION COMPLETE");
-					score = scoreTask(state, simulated[t]); //Warning: if using tree, avoid overflow with max values!
+					POGame.POGame nextState = simulated[t];
+					score = scoreTask(state, nextState); //Warning: if using tree, avoid overflow with max values!
+					
+					
 				}
 				debug("SCORE " + score);
 				if (score >= bestScore)
@@ -254,7 +282,8 @@ namespace SabberStoneCoreAi.src.Agent
 
 		public override void InitializeAgent()
 		{
-			debug("INITIALIZING AGENT");
+			debug("INITIALIZING AGENT (ONLY ONCE)");
+			
 			this.weights = new Dictionary<string, double>();
 			this.weights.Add(HERO_HEALTH_REDUCED,1);
 			this.weights.Add(HERO_ATTACK_REDUCED, 1);
@@ -262,9 +291,11 @@ namespace SabberStoneCoreAi.src.Agent
 			this.weights.Add(MINION_ATTACK_REDUCED, 1);
 			this.weights.Add(MINION_APPEARED, 1);
 			this.weights.Add(MINION_KILLED, 1);
+			this.weights.Add(SECRET_REMOVED, 1);
+			this.weights.Add(MANA_REDUCED,1);
 			this.weights.Add(M_HEALTH, 1);
 			this.weights.Add(M_ATTACK, 1);
-			this.weights.Add(M_HAS_BATTLECRY, 1);
+			//this.weights.Add(M_HAS_BATTLECRY, 1);
 			this.weights.Add(M_HAS_CHARGE, 1);
 			this.weights.Add(M_HAS_DEAHTRATTLE, 1);
 			this.weights.Add(M_HAS_DIVINE_SHIELD, 1);
