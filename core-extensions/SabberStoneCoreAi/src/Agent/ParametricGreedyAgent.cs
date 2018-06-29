@@ -56,7 +56,7 @@ namespace SabberStoneCoreAi.src.Agent
 			debug("SELECTED TASK TO EXECUTE "+stringTask(p.Key)+ "HAS A SCORE OF "+p.Value);
 			
 			debug("-------------------------------------");
-			//Console.ReadKey();
+			Console.ReadKey();
 
 			return p.Key;
 		}
@@ -183,7 +183,9 @@ namespace SabberStoneCoreAi.src.Agent
 		double calculateScoreSecretsRemoved(Controller playerBefore, Controller playerAfter) {
 
 			int dif = playerBefore.SecretZone.Count - playerAfter.SecretZone.Count;
-
+			if (dif != 0) {
+				Console.WriteLine("STOP");
+			}
 			//int dif = playerBefore.NumSecretsPlayedThisGame - playerAfter.NumSecretsPlayedThisGame;
 			return dif * weights[SECRET_REMOVED];
 		}
