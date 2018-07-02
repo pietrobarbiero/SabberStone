@@ -21,6 +21,7 @@ namespace SabberStoneCoreAi.src.Agent
 			
 		}
 
+		public static int NUM_PARAMETERS = 21;
 		public static string HERO_HEALTH_REDUCED = "HERO_HEALTH_REDUCED";
 		public static string HERO_ATTACK_REDUCED = "HERO_ATTACK_REDUCED";
 		public static string MINION_HEALTH_REDUCED = "MINION_HEALTH_REDUCED";
@@ -56,7 +57,7 @@ namespace SabberStoneCoreAi.src.Agent
 			debug("SELECTED TASK TO EXECUTE "+stringTask(p.Key)+ "HAS A SCORE OF "+p.Value);
 			
 			debug("-------------------------------------");
-			Console.ReadKey();
+			//Console.ReadKey();
 
 			return p.Key;
 		}
@@ -93,9 +94,9 @@ namespace SabberStoneCoreAi.src.Agent
 			debug("CALCULATING MY MINIONS");
 			double scoreMyMinions = calculateScoreMinions(before.CurrentPlayer.BoardZone, after.CurrentPlayer.BoardZone);
 			debug("Score my minions: " + scoreMyMinions);
-			debug("CALCULATING SECRETS");
 
 			//Differences in Secrets
+			debug("CALCULATING SECRETS");			
 			double scoreEnemySecrets = calculateScoreSecretsRemoved(before.CurrentOpponent, after.CurrentOpponent);
 			double scoreMySecrets    = calculateScoreSecretsRemoved(before.CurrentPlayer, after.CurrentPlayer);
 
@@ -113,7 +114,7 @@ namespace SabberStoneCoreAi.src.Agent
 				);
 			int diffHealth = (playerBefore.Hero.Health + playerBefore.Hero.Armor) - (playerAfter.Hero.Health+playerAfter.Hero.Armor);
 			int diffAttack = (playerBefore.Hero.AttackDamage) - (playerAfter.Hero.AttackDamage);
-			debug("DIFS"+diffHealth + " " + diffAttack);
+			//debug("DIFS"+diffHealth + " " + diffAttack);
 			double score = diffHealth * weights[HERO_HEALTH_REDUCED] + diffAttack * weights[HERO_ATTACK_REDUCED];
 			return score;
 		}
@@ -183,9 +184,9 @@ namespace SabberStoneCoreAi.src.Agent
 		double calculateScoreSecretsRemoved(Controller playerBefore, Controller playerAfter) {
 
 			int dif = playerBefore.SecretZone.Count - playerAfter.SecretZone.Count;
-			if (dif != 0) {
+			/*if (dif != 0) {
 				Console.WriteLine("STOP");
-			}
+			}*/
 			//int dif = playerBefore.NumSecretsPlayedThisGame - playerAfter.NumSecretsPlayedThisGame;
 			return dif * weights[SECRET_REMOVED];
 		}
@@ -286,30 +287,32 @@ namespace SabberStoneCoreAi.src.Agent
 		{
 			debug("INITIALIZING AGENT (ONLY ONCE)");
 			
-			this.weights = new Dictionary<string, double>();
-			this.weights.Add(HERO_HEALTH_REDUCED,1);
-			this.weights.Add(HERO_ATTACK_REDUCED, 1);
-			this.weights.Add(MINION_HEALTH_REDUCED, 1);
-			this.weights.Add(MINION_ATTACK_REDUCED, 1);
-			this.weights.Add(MINION_APPEARED, 1);
-			this.weights.Add(MINION_KILLED, 1);
-			this.weights.Add(SECRET_REMOVED, 1);
-			this.weights.Add(MANA_REDUCED,1);
-			this.weights.Add(M_HEALTH, 1);
-			this.weights.Add(M_ATTACK, 1);
-			//this.weights.Add(M_HAS_BATTLECRY, 1);
-			this.weights.Add(M_HAS_CHARGE, 1);
-			this.weights.Add(M_HAS_DEAHTRATTLE, 1);
-			this.weights.Add(M_HAS_DIVINE_SHIELD, 1);
-			this.weights.Add(M_HAS_INSPIRE, 1);
-			this.weights.Add(M_HAS_LIFE_STEAL, 1);
-			this.weights.Add(M_HAS_STEALTH, 1);
-			this.weights.Add(M_HAS_TAUNT, 1);
-			this.weights.Add(M_HAS_WINDFURY, 1);
-			this.weights.Add(M_RARITY, 1);
-			this.weights.Add(M_MANA_COST, 1);
-			this.weights.Add(M_POISONOUS, 1);
 
+		}
+
+		public void setAgentWeights(double[] w) {
+			this.weights = new Dictionary<string, double>();
+			this.weights.Add(HERO_HEALTH_REDUCED, w[0]);
+			this.weights.Add(HERO_ATTACK_REDUCED, w[1]);
+			this.weights.Add(MINION_HEALTH_REDUCED, w[2]);
+			this.weights.Add(MINION_ATTACK_REDUCED, w[3]);
+			this.weights.Add(MINION_APPEARED, w[4]);
+			this.weights.Add(MINION_KILLED, w[5]);
+			this.weights.Add(SECRET_REMOVED, w[6]);
+			this.weights.Add(MANA_REDUCED, w[7]);
+			this.weights.Add(M_HEALTH, w[8]);
+			this.weights.Add(M_ATTACK, w[9]);
+			this.weights.Add(M_HAS_CHARGE, w[10]);
+			this.weights.Add(M_HAS_DEAHTRATTLE, w[11]);
+			this.weights.Add(M_HAS_DIVINE_SHIELD, w[12]);
+			this.weights.Add(M_HAS_INSPIRE, w[13]);
+			this.weights.Add(M_HAS_LIFE_STEAL, w[14]);
+			this.weights.Add(M_HAS_STEALTH, w[15]);
+			this.weights.Add(M_HAS_TAUNT, w[16]);
+			this.weights.Add(M_HAS_WINDFURY, w[17]);
+			this.weights.Add(M_RARITY, w[18]);
+			this.weights.Add(M_MANA_COST, w[19]);
+			this.weights.Add(M_POISONOUS, w[20]);
 
 		}
 
@@ -332,7 +335,7 @@ namespace SabberStoneCoreAi.src.Agent
 		}
 
 		private void debug(string line) {
-			if(true)
+			if(false)
 				Console.WriteLine(line);
 		}
 	}
