@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "SabberStoneCoreAi": {
+      "commandName": "Project",
+      "commandLineArgs": "MidrangeJadeShaman SHAMAN 0.1#0.2#0.3#0.1#0.2#0.3#0.1#0.2#0.3#0.1#0.2#0.3#0.1#0.2#0.3#0.1#0.2#0.3#0.1#0.2#0.3 RenoKazakusMage MAGE 0.1#0.2#0.3#0.1#0.2#0.3#0.1#0.2#0.3#0.1#0.2#0.3#0.1#0.2#0.3#0.1#0.2#0.3#0.1#0.2#0.3 100"
+    }
+  }
+}
