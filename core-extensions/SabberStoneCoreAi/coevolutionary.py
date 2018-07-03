@@ -3,22 +3,39 @@ from time import time
 import inspyred
 
 
+def generate_weights(random, args):
+    size = args.get('num_weights')
+    return [random.uniform(0, 1) for i in range(size)]
+
+def evaluate_hearthstone(candidates, args):
+	fitness = []
+	for c in candidates:
+		print('Candidate {0} has a length of {1}'.format(c,len(c)))
+		total = 0
+		for i in range(0,len(c)):
+			total += c[i]
+			print "Total is " +str(total)
+		fitness.append(total)
+	return fitness
+
+
 def main(prng=None, display=False):
 	if prng is None:
 		prng = Random()
 		prng.seed(time())
 
-	problem = inspyred.benchmarks.Binary(inspyred.benchmarks.Schwefel(2),
-										 dimension_bits=30)
-	ea = inspyred.ec.GA(prng)
 
-	ea.terminator = inspyred.ec.terminators.evaluation_termination
-	final_pop = ea.evolve(generator=problem.generator,
-						  evaluator=problem.evaluator,
-						  pop_size=100, maximize=problem.maximize,
-						  bounder=problem.bounder,
-						  max_evaluations=30000,
-						  num_elites=1)
+	ea = inspyred.ec.ES(prng)
+	ea.terminator = [inspyred.ec.terminators.generation_termination] #inspyred.ec.terminators.diversity_termination
+
+	ea.observer = [inspyred.ec.observers.stats_observer, inspyred.ec.observers.file_observer]
+	final_pop = ea.evolve(generator=generate_weights,
+						  num_weights = 10,
+						  evaluator=evaluate_hearthstone,
+						  pop_size=10,
+						  bounder=inspyred.ec.Bounder(0,1),
+						  maximize=True,
+						  max_generations=100)
 
 	if display:
 		best = max(final_pop)
