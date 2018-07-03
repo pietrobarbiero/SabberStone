@@ -88,6 +88,8 @@ namespace SabberStoneCoreAi
 
 		}
 
+		
+
 		private static void Main(string[] args)
 		{
 
@@ -117,22 +119,25 @@ namespace SabberStoneCoreAi
 			GameConfig gameConfig = gameConfigCoevoluationary(args);
 
 			Console.WriteLine("Setup POGameHandler");
-			AbstractAgent player1 = ParametricAgentFromString(args[2]);
-			AbstractAgent player2 = ParametricAgentFromString(args[5]);
-			var gameHandler = new POGameHandler(gameConfig, player1, player2, debug:false);
-			
+			AbstractAgent player1agent = ParametricAgentFromString(args[2]);
+			AbstractAgent player2agent = ParametricAgentFromString(args[5]);
+			POGameHandler gameHandler = new POGameHandler(gameConfig, player1agent, player2agent, debug:false);
+			gameConfig.StartPlayer = -1; //Pick random start player
 
 			Console.WriteLine("STARTING GAMES");
-			//gameHandler.PlayGame();
 			int numGames = Int32.Parse(args[6]);
+
 			gameHandler.PlayGames(numGames);
 			GameStats gameStats = gameHandler.getGameStats();
-
 			//gameStats.printResults();
 			Console.WriteLine(gameStats.PlayerA_Wins+" "+gameStats.PlayerB_Wins+" "+ numGames);
 
-		
-			Console.ReadLine();
+
+
+
+
+
+			//Console.ReadLine();
 		}
 	}
 }
