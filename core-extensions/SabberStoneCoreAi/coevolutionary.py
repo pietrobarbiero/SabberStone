@@ -1,20 +1,31 @@
 from random import Random
 from time import time
 import inspyred
+#from inspyred.ec import Individual
 
 
 def generate_weights(random, args):
-    size = args.get('num_weights')
-    return [random.uniform(0, 1) for i in range(size)]
+	size = args.get('num_weights')
+	return [random.uniform(0, 1) for i in range(size)]
+
+
+def individual_to_commandline(ind):
+	#if ind is Individual get only the num_weights! else check that ind is a list of num_weights
+	return ""
+
 
 def evaluate_hearthstone(candidates, args):
+	parents = args['_ec'].population
+	for p in parents:
+		print("FITNESS OF PARENT IS "+str(p.fitness))
+		p.fitness = 0
 	fitness = []
 	for c in candidates:
 		print('Candidate {0} has a length of {1}'.format(c,len(c)))
 		total = 0
 		for i in range(0,len(c)):
 			total += c[i]
-			print "Total is " +str(total)
+			#print "Total is " +str(total)
 		fitness.append(total)
 	return fitness
 
@@ -24,18 +35,17 @@ def main(prng=None, display=False):
 		prng = Random()
 		prng.seed(time())
 
-
 	ea = inspyred.ec.ES(prng)
-	ea.terminator = [inspyred.ec.terminators.generation_termination] #inspyred.ec.terminators.diversity_termination
+	ea.terminator = [inspyred.ec.terminators.evaluation_termination] #inspyred.ec.terminators.diversity_termination
 
 	ea.observer = [inspyred.ec.observers.stats_observer, inspyred.ec.observers.file_observer]
 	final_pop = ea.evolve(generator=generate_weights,
-						  num_weights = 10,
+						  num_weights = 2,
 						  evaluator=evaluate_hearthstone,
 						  pop_size=10,
 						  bounder=inspyred.ec.Bounder(0,1),
 						  maximize=True,
-						  max_generations=100)
+						  max_evaluations=100)
 
 	if display:
 		best = max(final_pop)
