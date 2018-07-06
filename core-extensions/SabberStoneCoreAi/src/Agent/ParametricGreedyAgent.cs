@@ -359,7 +359,7 @@ namespace SabberStoneCoreAi.src.Agent
 		}
 
 		private void debug(string line) {
-			if(true)
+			if(false)
 				Console.WriteLine(line);
 		}
 	}
