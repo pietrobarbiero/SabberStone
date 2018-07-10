@@ -49,6 +49,7 @@ def my_file_observer(population, num_generations, num_evaluations, args):
 	except KeyError:
 		statistics_file = open('inspyred-statistics-file-{0}.csv'.format(time.strftime('%m%d%Y-%H%M%S')), 'w')
 		args['statistics_file'] = statistics_file
+		args['init_time'] = time.time()
 	try:
 		individuals_file = args['individuals_file']
 	except KeyError:
@@ -61,10 +62,11 @@ def my_file_observer(population, num_generations, num_evaluations, args):
 	avg_fit = stats['mean']
 	med_fit = stats['median']
 	std_fit = stats['std']
+	diff_time = time.time()-args['init_time']
 
 	statistics_file.write(
-		'{0}, {1}, {2}, {3}, {4}, {5}, {6}\n'.format(num_generations, len(population), worst_fit, best_fit, med_fit,
-													 avg_fit, std_fit))
+		'{0}, {1}, {2}, {3}, {4}, {5}, {6}, {7}\n'.format(num_generations, len(population), worst_fit, best_fit, med_fit,
+													 avg_fit, std_fit, diff_time))
 
 
 	for i, p in enumerate(population):
@@ -75,7 +77,7 @@ def my_file_observer(population, num_generations, num_evaluations, args):
 			if v != "TOTAL":
 				battles += str(dict_battles[v])+"-"
 
-		individuals_file.write('{0}, {1}, {2}, {3} BATTLES: {4}\n'.format(num_generations, i, p.fitness, str(p.candidate),battles))
+		individuals_file.write('{0}, {1}, {2}, {3}, BATTLES: {4}\n'.format(num_generations, i, p.fitness, str(p.candidate),battles))
 	statistics_file.flush()
 	individuals_file.flush()
 
@@ -101,9 +103,13 @@ def parse_file(file_name):
 
 
 def fight(f1, f2, d1, d2):
-	#w = randint(0,10)
-	#w1 = w
-	#w2 = 10 - w
+
+	test = False
+	if test:
+		w = randint(0,NUM_GAMES)
+		w1 = w
+		w2 = NUM_GAMES - w
+		return w1,w2
 
 	os.system("rm "+TEMP_FILE)
 	cml1 = individual_to_commandline(f1)
@@ -146,7 +152,7 @@ def evaluate_hearthstone(candidates, args):
 		for j,f2 in enumerate(to_fight):
 			for d1 in DECKS:
 				for d2 in DECKS:
-					if i<=j:
+					if i<j: #NOT COMPARING WITH HIMSELF!
 						#if DEBUG: print "\tVERSUS " + str(f2)
 						#if DEBUG: print ("\t\tCONFRONTING {0} vs {1} Ind{2} vs Ind{3}".format(d1,d2,f1,f2))
 						v1,v2 = fight(f1,f2,d1,d2)
