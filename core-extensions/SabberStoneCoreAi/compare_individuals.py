@@ -18,7 +18,7 @@ def sum_element(r):
 	return total
 
 decks_to_use=[]
-file_name = "test.individuals"
+file_name = "firsttest.individuals"
 with open(file_name, "r") as fp: lines = fp.readlines()
 num_games = filter(None, lines[0])
 individuals = {}
@@ -55,14 +55,18 @@ for i,ind1 in enumerate(individuals.keys()):
 		battles1=[]
 		battles2=[]
 		if i<j:
-			#print(str(i)+"vs"+str(j))
+			print(str(ind1)+"vs"+str(ind2))
 			for d1 in decks_to_use:
 				for d2 in decks_to_use:
 					w1,w2 = fight(individuals[ind1],individuals[ind2],d1,d2)
 					battles1.append(w1)
 					battles2.append(w2)
-			df[ind1][ind2] = battles1
-			df[ind2][ind1] = battles2
+			print(str(ind1)+" WON "+str(sum(battles1)))
+			print(str(ind2)+" WON "+str(sum(battles2)))
+			#df[ind1][ind2] = battles1
+			#df[ind2][ind1] = battles2
+			df.set_value(ind1,ind2,battles1)
+			df.set_value(ind2,ind1,battles2)
 
 with pd.option_context('display.max_colwidth', 100,'display.max_columns',100,'display.max_rows',100):
 	print(df)
