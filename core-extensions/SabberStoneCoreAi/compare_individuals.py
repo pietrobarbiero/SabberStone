@@ -1,4 +1,4 @@
-from coevolutionary import fight
+from coevolutionary import launch_simulator
 from coevolutionary import NUM_GAMES as NG
 from coevolutionary import NUM_WEIGHTS as NW
 import pandas as pd
@@ -58,7 +58,7 @@ for i,ind1 in enumerate(individuals.keys()):
 			print(str(ind1)+"vs"+str(ind2))
 			for d1 in decks_to_use:
 				for d2 in decks_to_use:
-					w1,w2 = fight(individuals[ind1],individuals[ind2],d1,d2)
+					w1,w2 = launch_(individuals[ind1],individuals[ind2],d1,d2,"temp.tmp")
 					battles1.append(w1)
 					battles2.append(w2)
 			print(str(ind1)+" WON "+str(sum(battles1)))
