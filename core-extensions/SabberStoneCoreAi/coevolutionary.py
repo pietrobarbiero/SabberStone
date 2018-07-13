@@ -230,7 +230,7 @@ def evaluate_hearthstone(candidates, args):
 		sys.stdin.read(1)
 	"""
 	for battle in battles_list:
-		execute_simulator_in_thread(battle,"0")
+		execute_simulator_in_thread(battle,TEMP_FILE_NAME)
 
 	for i,v in enumerate(victories):
 		args["_dictionary_battles"].update({repr(to_fight[i]): victories[i]})
