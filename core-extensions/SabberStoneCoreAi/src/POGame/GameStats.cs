@@ -45,11 +45,11 @@ namespace SabberStoneCoreAi.POGame
 			{
 				wins[0]++;
 				turnsPlayer1ToWin += game.Turn;
-				healthDifferenceWhenP1Wins = game.Player1.Hero.Health - game.Player2.Hero.Health;
+				healthDifferenceWhenP1Wins += game.Player1.Hero.Health - game.Player2.Hero.Health;
 			}
 			else {
 				turnsPlayer1ToLose += game.Turn;
-				healthDifferenceWhenP1Loses = game.Player2.Hero.Health - game.Player1.Hero.Health;
+				healthDifferenceWhenP1Loses += game.Player2.Hero.Health - game.Player1.Hero.Health;
 			}
 
 			if (game.Player2.PlayState == PlayState.WON)
