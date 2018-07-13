@@ -5,6 +5,7 @@ import inspyred
 import os
 import subprocess, threading
 import numpy as np
+import sys
 
 #from inspyred.ec import Individual
 
@@ -14,8 +15,8 @@ HERO_BY_DECK = {"RenoKazakusMage":"MAGE", "MidrangeJadeShaman":"SHAMAN" , "Aggro
 NUM_GAMES = 20
 NUM_WEIGHTS = 21 #21
 TEMP_FILE_NAME = "results.tmp"
-POP_SIZE = 5
-NUM_THREADS = 8
+POP_SIZE = 10
+NUM_THREADS = 2
 MAX_EVALUATIONS = 1000
 
 
@@ -113,14 +114,16 @@ def individual_to_commandline(ind):
 
 
 def parse_file(file_name):
+	print("PARSING FILE "+file_name)
 	with open(file_name, "r") as fp : lines = fp.readlines()
+	print("FILE IS "+str(lines))
 	match_info = filter(None, lines[-1].split(" "))
 	return int(match_info[0]),int(match_info[1])
 
 
 def launch_simulator(f1, f2, d1, d2, file_name):
 
-	test = False
+	test = True
 
 
 
@@ -132,7 +135,7 @@ def launch_simulator(f1, f2, d1, d2, file_name):
 		w = randint(0,NUM_GAMES)
 		w1 = w
 		w2 = NUM_GAMES - w
-		time.sleep(randint(0,4))
+		time.sleep(randint(0,0))
 		command_line = "echo "+str(w1)+" "+str(w2)+" >"+file_name
 	else:
 		command_line = "dotnet run {0} {1} {2} {3} {4} {5} {6} {7}".format(d1,HERO_BY_DECK[d1],cml1,d2,HERO_BY_DECK[d2],cml2,NUM_GAMES," > "+file_name)
@@ -146,7 +149,7 @@ def launch_simulator(f1, f2, d1, d2, file_name):
 
 def execute_simulator_in_thread(battle, filename):
 	thread_name = threading.currentThread().getName()
-	print(thread_name+" STARTING "+str(battle))
+	print(thread_name+" STARTING ")
 	global victories
 	id_1 = battle[0]
 	id_2 = battle[1]
@@ -210,6 +213,7 @@ def evaluate_hearthstone(candidates, args):
 						battles_list.append([i,j,f1,f2,d1,d2])
 
 
+	"""
 	chunk_battles = chunks(battles_list,NUM_THREADS)
 
 	for parallel_battle in chunk_battles:
@@ -222,6 +226,11 @@ def evaluate_hearthstone(candidates, args):
 			t.start()
 		for t in threads:
 			t.join()
+		print("PRESS ANY KEY TO CONTINUE")
+		sys.stdin.read(1)
+	"""
+	for battle in battles_list:
+		execute_simulator_in_thread(battle,"0")
 
 	for i,v in enumerate(victories):
 		args["_dictionary_battles"].update({repr(to_fight[i]): victories[i]})
