@@ -8,7 +8,7 @@ using SabberStoneCoreAi.src.Agent;
 using SabberStoneCoreAi.Meta;
 using SabberStoneCore.Model;
 using System.Collections.Generic;
-using System.Globalization;
+
 
 namespace SabberStoneCoreAi
 {
@@ -69,24 +69,6 @@ namespace SabberStoneCoreAi
 
 		}
 
-		private static AbstractAgent ParametricAgentFromString(string values)
-		{
-			ParametricGreedyAgent player = new ParametricGreedyAgent();
-
-			string[] vs = values.Split("#");
-
-			if (vs.Length != ParametricGreedyAgent.NUM_PARAMETERS)
-				throw new Exception("NUM VALUES NOT CORRECT");
-
-			double[] ws = new double[ParametricGreedyAgent.NUM_PARAMETERS];
-			for(int i = 0; i<ws.Length;i++) {
-				ws[i] = Double.Parse(vs[i], CultureInfo.InvariantCulture);				
-			}
-
-			player.setAgentWeights(ws);
-			return player;
-
-		}
 
 		
 
@@ -119,8 +101,10 @@ namespace SabberStoneCoreAi
 			GameConfig gameConfig = gameConfigCoevoluationary(args);
 
 			Console.WriteLine("Setup POGameHandler");
-			AbstractAgent player1agent = ParametricAgentFromString(args[2]);
-			AbstractAgent player2agent = ParametricAgentFromString(args[5]);
+			AbstractAgent player1agent = new ParametricGreedyAgent();
+			((ParametricGreedyAgent)player1agent).setAgeintWeightsFromString(args[2]);
+			AbstractAgent player2agent = new ParametricGreedyAgent();
+			((ParametricGreedyAgent)player2agent).setAgeintWeightsFromString(args[5]);
 			POGameHandler gameHandler = new POGameHandler(gameConfig, player1agent, player2agent, debug:false);
 			gameConfig.StartPlayer = -1; //Pick random start player
 
@@ -130,10 +114,14 @@ namespace SabberStoneCoreAi
 			gameHandler.PlayGames(numGames);
 			GameStats gameStats = gameHandler.getGameStats();
 			//gameStats.printResults();
-			Console.WriteLine(gameStats.PlayerA_Wins+" "+gameStats.PlayerB_Wins+" "+ numGames);
-
-
-
+			int p1wins = gameStats.PlayerA_Wins;
+			int p2wins = gameStats.PlayerB_Wins;
+			Console.WriteLine(p1wins+" "+p2wins+" "+ numGames+ " " +
+				gameStats.PlayerA_TurnsToWin+" "+
+				gameStats.PlayerA_TurnsToLose+" "+
+				gameStats.PlayerA_HealthDifferenceWinning + " " +
+				gameStats.PlayerA_HealthDifferenceLosing
+				);
 
 
 

@@ -15,6 +15,20 @@ namespace SabberStoneCoreAi.POGame
 		private int[] wins = new[] { 0, 0 };
 		private long[] time_per_player = new[] {0L, 0L};
 
+		//My Data
+		/*int[] turnsToWin = new[] { 0, 0 };
+		int[] turnsToLose = new[] { 0, 0 };
+		int[] healthDifferenceWinning = new[] { 0, 0 };
+		int[] healthDifferenceLosing = new[] { 0, 0 };*/
+
+		int turnsPlayer1ToWin = 0;
+		int turnsPlayer1ToLose = 0;
+		int healthDifferenceWhenP1Wins = 0;
+		int healthDifferenceWhenP1Loses = 0;
+
+		
+
+
 		//Todo add getter for each private variable
 
 		public GameStats()
@@ -28,9 +42,20 @@ namespace SabberStoneCoreAi.POGame
 			turns += game.Turn;
 
 			if (game.Player1.PlayState == PlayState.WON)
+			{
 				wins[0]++;
+				turnsPlayer1ToWin += game.Turn;
+				healthDifferenceWhenP1Wins += game.Player1.Hero.Health - game.Player2.Hero.Health;
+			}
+			else {
+				turnsPlayer1ToLose += game.Turn;
+				healthDifferenceWhenP1Loses += game.Player2.Hero.Health - game.Player1.Hero.Health;
+			}
+
 			if (game.Player2.PlayState == PlayState.WON)
+			{
 				wins[1]++;
+			}
 
 			time_per_player[0] += playerWatches[0].ElapsedMilliseconds;
 			time_per_player[1] += playerWatches[1].ElapsedMilliseconds;
@@ -74,6 +99,47 @@ namespace SabberStoneCoreAi.POGame
 				return this.wins[1];
 			}
 		}
+
+		//MY DATA
+		public int PlayerA_TurnsToWin {
+			get
+			{
+				return this.turnsPlayer1ToWin;
+			}
+		}
+
+
+
+		public int PlayerA_TurnsToLose
+		{
+			get
+			{
+				return this.turnsPlayer1ToLose;
+			}
+		}
+
+
+
+		public int PlayerA_HealthDifferenceWinning
+		{
+			get
+			{
+				return this.healthDifferenceWhenP1Wins;
+			}
+		}
+
+
+
+		public int PlayerA_HealthDifferenceLosing
+		{
+			get
+			{
+				return this.healthDifferenceWhenP1Loses;
+			}
+		}
+
+
+
 
 	}
 }

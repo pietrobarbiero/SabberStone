@@ -1,5 +1,5 @@
 ﻿/*
- * ParametricGreedyAgent.cs
+ * EVA.cs
  * 
  * Copyright (c) 2018, Pablo Garcia-Sanchez. All rights reserved.
  *
@@ -34,7 +34,7 @@ using System.Globalization;
 
 namespace SabberStoneCoreAi.src.Agent
 {
-	class ParametricGreedyAgent : AbstractAgent
+	class EVA : AbstractAgent
 	{
 		public override void FinalizeAgent()
 		{
@@ -310,12 +310,13 @@ namespace SabberStoneCoreAi.src.Agent
 
 		public override void InitializeAgent()
 		{
-			debug("INITIALIZING AGENT (ONLY ONCE)");
+			Console.WriteLine("Initializing EVA");
+			this.setAgeintWeightsFromString("0.569460712743#0.958111820041#0.0689492467097#0.0#0.843573987219#0.700225423688#0.907680353441#0.0#0.993682660717#1.0#0.640753949511#0.992872512338#0.92870036875#0.168100484322#0.870080107454#0.0#0.42897762808#1.0#0.0#0.583884736646#0.0");
 			
 
 		}
 
-		public void setAgentWeights(double[] w) {
+		private void setAgentWeights(double[] w) { //EVA has this function private!
 			this.weights = new Dictionary<string, double>();
 			this.weights.Add(HERO_HEALTH_REDUCED, w[0]);
 			this.weights.Add(HERO_ATTACK_REDUCED, w[1]);
@@ -341,7 +342,7 @@ namespace SabberStoneCoreAi.src.Agent
 
 		}
 
-		public void setAgeintWeightsFromString(string weights) {
+		private void setAgeintWeightsFromString(string weights) { //This function is private, just in case 
 			debug("Setting agent weights from string");
 			string[] vs = weights.Split("#");
 
