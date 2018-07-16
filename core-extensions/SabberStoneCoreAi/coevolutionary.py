@@ -4,7 +4,6 @@ import time
 import inspyred
 import os
 import subprocess, threading
-import numpy as np
 import sys
 
 #from inspyred.ec import Individual
@@ -16,7 +15,7 @@ NUM_GAMES = 20
 NUM_WEIGHTS = 21 #21
 TEMP_FILE_NAME = "results.tmp"
 POP_SIZE = 10
-NUM_THREADS = 2
+NUM_THREADS = 8
 MAX_EVALUATIONS = 1000
 
 
@@ -116,15 +115,15 @@ def individual_to_commandline(ind):
 def parse_file(file_name):
 	print("PARSING FILE "+file_name)
 	with open(file_name, "r") as fp : lines = fp.readlines()
-	print("FILE IS "+str(lines))
+	#print("FILE IS "+str(lines))
 	match_info = filter(None, lines[-1].split(" "))
 	return int(match_info[0]),int(match_info[1])
 
 
-def launch_simulator(f1, f2, d1, d2, file_name):
+def launch_simulator(f1, f2, d1, d2, thread_id):
 
-	test = True
-
+	test = False
+	file_name = thread_id+TEMP_FILE_NAME
 
 
 
@@ -138,16 +137,27 @@ def launch_simulator(f1, f2, d1, d2, file_name):
 		time.sleep(randint(0,0))
 		command_line = "echo "+str(w1)+" "+str(w2)+" >"+file_name
 	else:
-		command_line = "dotnet run {0} {1} {2} {3} {4} {5} {6} {7}".format(d1,HERO_BY_DECK[d1],cml1,d2,HERO_BY_DECK[d2],cml2,NUM_GAMES," > "+file_name)
+		command_line = "dotnet run --project /home/pgarcia/code/PARALLEL_HS/SabberStone"+thread_id+"/core-extensions/SabberStoneCoreAi/SabberStoneCoreAi.csproj"
+		command_line += " {0} {1} {2} {3} {4} {5} {6} {7}".format(d1,HERO_BY_DECK[d1],cml1,d2,HERO_BY_DECK[d2],cml2,NUM_GAMES," > "+file_name)
 
 	if DEBUG:print "\t\t"+command_line
 	com = Command(command_line)
-	com.run(100) #100 SECONDS MAX!
+
+	attempts = 0
+	finished = False
+	while not finished:
+		print "Launching attempt " + str(attempts)
+		finished = com.run(100)  # 1200
+		attempts = attempts + 1
+		if attempts == 3:
+			finished = True
+
+
 	w1,w2 = parse_file(file_name)
 	if DEBUG:print "\t\tNUMBERS ARE "+str(w1)+" "+str(w2)
 	return w1, w2
 
-def execute_simulator_in_thread(battle, filename):
+def execute_simulator_in_thread(battle):
 	thread_name = threading.currentThread().getName()
 	print(thread_name+" STARTING ")
 	global victories
@@ -158,7 +168,7 @@ def execute_simulator_in_thread(battle, filename):
 	deck_1 = battle[4]
 	deck_2 = battle[5]
 
-	v1, v2 = launch_simulator(weights_1,weights_2,deck_1,deck_2,filename)
+	v1, v2 = launch_simulator(weights_1,weights_2,deck_1,deck_2,thread_name)
 	with lock:
 		victories[id_1]["TOTAL"] += v1
 		victories[id_1][deck_1 + deck_2] += v1
@@ -213,24 +223,25 @@ def evaluate_hearthstone(candidates, args):
 						battles_list.append([i,j,f1,f2,d1,d2])
 
 
-	"""
+
 	chunk_battles = chunks(battles_list,NUM_THREADS)
 
 	for parallel_battle in chunk_battles:
 		threads = []
 		if DEBUG: print("EXECUTING PARALLEL BATTLES: "+str(len(parallel_battle)))
 		for i,battle in enumerate(parallel_battle):
-			t = threading.Thread(target=execute_simulator_in_thread, args=(battle,str(i)+TEMP_FILE_NAME), name="thread_function"+str(i))
+			t = threading.Thread(target=execute_simulator_in_thread, args=(battle,), name=str(i))
 			threads.append(t)
 		for t in threads:
 			t.start()
 		for t in threads:
 			t.join()
-		print("PRESS ANY KEY TO CONTINUE")
-		sys.stdin.read(1)
-	"""
-	for battle in battles_list:
-		execute_simulator_in_thread(battle,TEMP_FILE_NAME)
+		#print("PRESS ANY KEY TO CONTINUE")
+		#sys.stdin.read(1)
+
+	#for battle in battles_list:
+		#print(battle)
+		#execute_simulator_in_thread(battle,TEMP_FILE_NAME)
 
 	for i,v in enumerate(victories):
 		args["_dictionary_battles"].update({repr(to_fight[i]): victories[i]})
