@@ -58,6 +58,21 @@ def chunks(l, n):
 		yield l[i:i + n]
 
 
+def print_squared_array(the_array):
+	l = ""
+	for i in range(0,len(the_array)):
+		total = 0
+		for j in range(0,len(the_array)): #WARNING, THE ARRAY IS SQUARED!
+			if isinstance(the_array[i][j],float):
+				v="{0:.2f}".format(the_array[i][j])
+			else:
+				v=str(the_array[i][j])
+			l = l+v+" "
+			total += the_array[i][j]
+		l = l+" TOTAL: "+str(total)+"\n"
+	return l
+
+
 def my_file_observer(population, num_generations, num_evaluations, args):
 
 	try:
@@ -71,6 +86,11 @@ def my_file_observer(population, num_generations, num_evaluations, args):
 	except KeyError:
 		individuals_file = open('inspyred-individuals-file-{0}.csv'.format(time.strftime('%m%d%Y-%H%M%S')), 'w')
 		args['individuals_file'] = individuals_file
+	try:
+		matrix_file = args['matrix_file']
+	except KeyError:
+		matrix_file = open('inspyred-matrix-file-{0}.csv'.format(time.strftime('%m%d%Y-%H%M%S')), 'w')
+		args['matrix_file'] = matrix_file
 
 	stats = inspyred.ec.analysis.fitness_statistics(population)
 	worst_fit = stats['worst']
@@ -94,8 +114,23 @@ def my_file_observer(population, num_generations, num_evaluations, args):
 				battles += str(dict_battles[v])+"-"
 
 		individuals_file.write('{0}, {1}, {2}, {3}, BATTLES: {4}\n'.format(num_generations, i, p.fitness, str(p.candidate),battles))
+
+	matrix_file.write(str(num_generations))
+	matrix_file.write("\nVICTORIES\n")
+	matrix_file.write(args["_matrix_victories"])
+	matrix_file.write("\nTURNS_WIN\n")
+	matrix_file.write(args["_matrix_turns_win"])
+	matrix_file.write("\nTURNS_LOSE\n")
+	matrix_file.write(args["_matrix_turns_lose"])
+	matrix_file.write("\nHEALTH_WIN\n")
+	matrix_file.write(args["_matrix_health_win"])
+	matrix_file.write("\nHEALTH_LOSE\n")
+	matrix_file.write(args["_matrix_health_lose"])
+
+
 	statistics_file.flush()
 	individuals_file.flush()
+	matrix_file.flush()
 
 
 def generate_weights(random, args):
@@ -117,7 +152,7 @@ def parse_file(file_name):
 	with open(file_name, "r") as fp : lines = fp.readlines()
 	#print("FILE IS "+str(lines))
 	match_info = filter(None, lines[-1].split(" "))
-	return int(match_info[0]),int(match_info[1])
+	return int(match_info[0]),int(match_info[1]),int(match_info[3]),int(match_info[4]),int(match_info[5]),int(match_info[6])
 
 
 def launch_simulator(f1, f2, d1, d2, thread_id):
@@ -134,8 +169,12 @@ def launch_simulator(f1, f2, d1, d2, thread_id):
 		w = randint(0,NUM_GAMES)
 		w1 = w
 		w2 = NUM_GAMES - w
+		tw = randint(0,15*NUM_GAMES)
+		tl = randint(0,15*NUM_GAMES)
+		hw = randint(0,5*NUM_GAMES)
+		hl = randint(0,5*NUM_GAMES)
 		time.sleep(randint(0,0))
-		command_line = "echo "+str(w1)+" "+str(w2)+" >"+file_name
+		command_line = "echo {0} {1} {2} {3} {4} {5} {6} > {7} ".format(w1,w2,NUM_GAMES,tw,tl,hw,hl,file_name)
 	else:
 		command_line = "dotnet run --project /home/pgarcia/code/PARALLEL_HS/SabberStone"+thread_id+"/core-extensions/SabberStoneCoreAi/SabberStoneCoreAi.csproj"
 		command_line += " {0} {1} {2} {3} {4} {5} {6} {7}".format(d1,HERO_BY_DECK[d1],cml1,d2,HERO_BY_DECK[d2],cml2,NUM_GAMES," > "+file_name)
@@ -153,9 +192,9 @@ def launch_simulator(f1, f2, d1, d2, thread_id):
 			finished = True
 
 
-	w1,w2 = parse_file(file_name)
+	w1,w2, tw, tl, hw, hl = parse_file(file_name)
 	if DEBUG:print "\t\tNUMBERS ARE "+str(w1)+" "+str(w2)
-	return w1, w2
+	return w1, w2, tw, tl, hw, hl
 
 def execute_simulator_in_thread(battle):
 	thread_name = threading.currentThread().getName()
@@ -168,7 +207,7 @@ def execute_simulator_in_thread(battle):
 	deck_1 = battle[4]
 	deck_2 = battle[5]
 
-	v1, v2 = launch_simulator(weights_1,weights_2,deck_1,deck_2,thread_name)
+	v1, v2, tw, tl, hw, hl = launch_simulator(weights_1,weights_2,deck_1,deck_2,thread_name)
 	with lock:
 		victories[id_1]["TOTAL"] += v1
 		victories[id_1][deck_1 + deck_2] += v1
@@ -176,6 +215,14 @@ def execute_simulator_in_thread(battle):
 		victories[id_2][deck_2 + deck_1] += v2
 		victories_versus[id_1][id_2] +=v1
 		victories_versus[id_2][id_1] +=v2
+		turns_win[id_1][id_2] += tw
+		turns_win[id_2][id_1] += tl
+		turns_lose[id_1][id_2] += tl
+		turns_lose[id_2][id_1] += tw
+		health_win[id_1][id_2] += hw
+		health_win[id_2][id_1] += hl
+		health_lose[id_1][id_2] += hl
+		health_lose[id_2][id_1] += hw
 	print(thread_name+" FINISHING")
 
 def evaluate_hearthstone(candidates, args):
@@ -195,21 +242,43 @@ def evaluate_hearthstone(candidates, args):
 
 	global victories
 	global victories_versus
+	global turns_win
+	global turns_lose
+	global health_win
+	global health_lose
+
 	victories = []
 	victories_versus = []
+	turns_win = []
+	turns_lose = []
+	health_win = []
+	health_lose = []
+
 
 	fitness = []
 
 	for i in range(0,len(to_fight)):
 		victories.append({})
 		victories_versus.append([])
+		turns_win.append([])
+		turns_lose.append([])
+		health_win.append([])
+		health_lose.append([])
 		victories[i]["TOTAL"] = 0
 		for d1 in DECKS:
 			for d2 in DECKS:
 				victories[i][d1+d2] = 0
 		for j in range(0,len(to_fight)):
 			victories_versus[i].append([])
+			turns_win[i].append([])
+			turns_lose[i].append([])
+			health_win[i].append([])
+			health_lose[i].append([])
 			victories_versus[i][j] = 0
+			turns_win[i][j] = 0
+			turns_lose[i][j] = 0
+			health_win[i][j] = 0
+			health_lose[i][j] = 0
 
 	battles_list = []
 	for i,f1 in enumerate(to_fight):
@@ -251,16 +320,33 @@ def evaluate_hearthstone(candidates, args):
 		else:
 			fitness.append(victories[i]["TOTAL"])
 
+	print("VICTORIES")
+	args["_matrix_victories"]  = print_squared_array(victories_versus)
+
 	for i in range(0,len(victories_versus)):
-		l = ""
 		for j in range(0,len(victories_versus)): #WARNING, THE ARRAY IS SQUARED!
-			l = l+str(victories_versus[i][j])+" "
-		print(l)
+			if i !=j:
+				turns_win[i][j] = turns_win[i][j]/float(victories_versus[i][j])
+				turns_lose[i][j] = turns_lose[i][j]/float(victories_versus[j][i])
+				health_win[i][j] = health_win[i][j]/float(victories_versus[i][j])
+				health_lose[i][j] = health_lose[i][j]/float(victories_versus[j][i])
+
+
+	print("TURNS TO WIN")
+	args["_matrix_turns_win"] = print_squared_array(turns_win)
+	print("TURNS TO LOSE")
+	args["_matrix_turns_lose"] = print_squared_array(turns_lose)
+	print("HEALTH TO WIN")
+	args["_matrix_health_win"] = print_squared_array(health_win)
+	print("HEALTH TO LOSE")
+	args["_matrix_health_lose"] =print_squared_array(health_lose)
+
+
 
 	return fitness
 
 
-def main(prng=None, display=False):
+def run_one(prng=None, display=False):
 	if prng is None:
 		prng = Random()
 		prng.seed(time.time())
@@ -284,6 +370,10 @@ def main(prng=None, display=False):
 	time2 = time.time()
 	print 'TIME ELAPSED = '+str(time2 - time1)
 	return ea
+
+def main(prng=None, display=False):
+	for i in range(0,10):
+		run_one(prng,display)
 
 
 if __name__ == '__main__':
