@@ -17,6 +17,7 @@ TEMP_FILE_NAME = "results.tmp"
 POP_SIZE = 10
 NUM_THREADS = 8
 MAX_EVALUATIONS = 1000
+TEST_DUMMY = False
 
 
 lock = threading.Lock()
@@ -157,7 +158,7 @@ def parse_file(file_name):
 
 def launch_simulator(f1, f2, d1, d2, thread_id):
 
-	test = False
+	test = TEST_DUMMY
 	file_name = thread_id+TEMP_FILE_NAME
 
 
@@ -326,10 +327,18 @@ def evaluate_hearthstone(candidates, args):
 	for i in range(0,len(victories_versus)):
 		for j in range(0,len(victories_versus)): #WARNING, THE ARRAY IS SQUARED!
 			if i !=j:
-				turns_win[i][j] = turns_win[i][j]/float(victories_versus[i][j])
-				turns_lose[i][j] = turns_lose[i][j]/float(victories_versus[j][i])
-				health_win[i][j] = health_win[i][j]/float(victories_versus[i][j])
-				health_lose[i][j] = health_lose[i][j]/float(victories_versus[j][i])
+				ij = float(victories_versus[i][j])
+				ji = float(victories_versus[j][i])
+				if ij > 0: #To avoid divide by 0
+					turns_win[i][j] = turns_win[i][j]/ij
+					health_win[i][j] = health_win[i][j] / ij
+				if ji > 0:
+					turns_lose[i][j] = turns_lose[i][j] / ji
+					health_lose[i][j] = health_lose[i][j] / ji
+
+
+
+
 
 
 	print("TURNS TO WIN")
