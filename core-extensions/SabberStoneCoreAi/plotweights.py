@@ -11,7 +11,7 @@ for fname in os.listdir(directory):
 		files.append(directory+fname)
 
 
-df_weights = pd.DataFrame(columns=( "HHA", "HAR", "BMHR", "BMAR", "BMA", "BMK", "BSR", "BMR", "MH", "MA", "MHC", "MHD", "MHDS", "MHI", "MHLS", "MHS", "MHT", "MHW", "MR", "MM", "MHP"))
+df_weights = pd.DataFrame(columns=( "HHR", "HAR", "BMHR", "BMAR", "BMA", "BMK", "BSR", "BMR", "MH", "MA", "MHC", "MHD", "MHDS", "MHI", "MHLS", "MHS", "MHT", "MHW", "MR", "MM", "MHP"))
 
 for f, filename in enumerate(files):
 	print "Reading file "+filename
@@ -32,8 +32,8 @@ for f, filename in enumerate(files):
 				df_weights.loc[len(df_weights)] = values
 
 print df_weights
-"""
-axes_battlefield = df_weights.boxplot(column=["HHA", "HAR", "BMHR", "BMAR", "BMA", "BMK", "BSR", "BMR"])
+
+axes_battlefield = df_weights.boxplot(column=["HHR", "HAR", "BMHR", "BMAR", "BMA", "BMK", "BSR", "BMR"])
 axes_battlefield.set_ylabel("Weight")
 fig_battlefield = axes_battlefield.get_figure()
 fig_battlefield.savefig("weights_battlefield.png")
@@ -42,5 +42,5 @@ axes_minions = df_weights.boxplot(column=["MH", "MA", "MHC", "MHD", "MHDS", "MHI
 axes_minions.set_ylabel("Weight")
 fig_minions = axes_minions.get_figure()
 fig_minions.savefig("weights_minions.png")
-
+"""
 
