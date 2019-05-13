@@ -156,10 +156,10 @@ def parse_file(file_name):
 	return int(match_info[0]),int(match_info[1]),int(match_info[3]),int(match_info[4]),int(match_info[5]),int(match_info[6])
 
 
-def launch_simulator(f1, f2, d1, d2, thread_id):
+def launch_simulator(f1, f2, d1, d2, thread_id,temp_file_name):
 
 	test = TEST_DUMMY
-	file_name = thread_id+TEMP_FILE_NAME
+	file_name = thread_id+temp_file_name
 
 
 
@@ -208,7 +208,7 @@ def execute_simulator_in_thread(battle):
 	deck_1 = battle[4]
 	deck_2 = battle[5]
 
-	v1, v2, tw, tl, hw, hl = launch_simulator(weights_1,weights_2,deck_1,deck_2,thread_name)
+	v1, v2, tw, tl, hw, hl = launch_simulator(weights_1,weights_2,deck_1,deck_2,thread_name,TEMP_FILE_NAME)
 	with lock:
 		victories[id_1]["TOTAL"] += v1
 		victories[id_1][deck_1 + deck_2] += v1
