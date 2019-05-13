@@ -18,7 +18,7 @@ def sum_element(r):
 	return total
 
 decks_to_use=[]
-file_name = "firsttest.individuals"
+file_name = "centroids.individuals"
 with open(file_name, "r") as fp: lines = fp.readlines()
 num_games = filter(None, lines[0])
 individuals = {}
@@ -27,7 +27,9 @@ for line in lines:
 		decks_to_use.append(line[line.find("DECK:")+5:-1])
 	else:
 		str_individual = line[line.find("[") + 1:line.find("]")]
+		print(str_individual)
 		individual_list = [float(i) for i in str_individual.split(",")]
+
 		individual_list = individual_list[:NUM_WEIGHTS]
 		name_individual = line.split(",")[-1]
 		individuals.update({name_individual:individual_list})
@@ -58,11 +60,12 @@ for i,ind1 in enumerate(individuals.keys()):
 			print(str(ind1)+"vs"+str(ind2))
 			for d1 in decks_to_use:
 				for d2 in decks_to_use:
-					w1,w2 = launch_simulator(individuals[ind1],individuals[ind2],d1,d2,"temp.tmp")
+					w1, w2, tw, tl, hw, hl = launch_simulator(individuals[ind1],individuals[ind2],d1,d2,"0","testing.tmp")
+					print("-----{},{},{},{},{},{}".format(ind1[:-1],ind2[:-1],d1,d2,w1,w2)) #removing the \n in the name
 					battles1.append(w1)
 					battles2.append(w2)
-			print(str(ind1)+" WON "+str(sum(battles1)))
-			print(str(ind2)+" WON "+str(sum(battles2)))
+			#print(str(ind1)+" WON "+str(sum(battles1)))
+			#print(str(ind2)+" WON "+str(sum(battles2)))
 			#df[ind1][ind2] = battles1
 			#df[ind2][ind1] = battles2
 			df.set_value(ind1,ind2,battles1)
