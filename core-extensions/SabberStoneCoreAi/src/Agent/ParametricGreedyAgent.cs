@@ -1,6 +1,6 @@
 ﻿/*
  * ParametricGreedyAgent.cs
- * 
+ *
  * Copyright (c) 2018, Pablo Garcia-Sanchez. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or
@@ -17,7 +17,7 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
  * MA 02110-1301  USA
- * 
+ *
  * Contributors:
  * Alberto Tonda (INRA)
  */
@@ -38,12 +38,12 @@ namespace SabberStoneCoreAi.src.Agent
 	{
 		public override void FinalizeAgent()
 		{
-			
+
 		}
 
 		public override void FinalizeGame()
 		{
-			
+
 		}
 
 		public static int NUM_PARAMETERS = 21;
@@ -69,19 +69,28 @@ namespace SabberStoneCoreAi.src.Agent
 		public static string M_HAS_WINDFURY = "M_HAS_WINDFURY";
 		public static string M_RARITY = "M_RARITY";
 		public static string M_MANA_COST = "M_MANA_COST";
-		public static string M_POISONOUS = "M_POISONOUS";		
+		public static string M_POISONOUS = "M_POISONOUS";
 
 		public Dictionary<string, double> weights;
 
 
 		public override PlayerTask GetMove(POGame.POGame poGame)
 		{
-			
-			debug("CURRENT TURN: " + poGame.Turn);
+			// here we output EVERYTHING that could be related to the game state
+			// to be later parsed and turned into a state
+			debug("--- TURN:" + poGame.Turn);
+			debug("CURRENT_PLAYER:" + poGame.CurrentPlayer);
+			debug("HERO:" + poGame.CurrentPlayer.Hero.FullPrint());
+			debug("HAND:" + poGame.CurrentPlayer.HandZone.FullPrint());
+			debug("BOARD:" + poGame.CurrentPlayer.BoardZone.FullPrint());
+			debug("DECK:" + poGame.CurrentPlayer.DeckZone.FullPrint());
+			debug("OPPONENT_HAND:" + poGame.CurrentOpponent.HandZone.Count());
+
+			//debug("CURRENT TURN: " + poGame.Turn);
 			KeyValuePair<PlayerTask,double> p = getBestTask(poGame);
-			debug("SELECTED TASK TO EXECUTE "+stringTask(p.Key)+ "HAS A SCORE OF "+p.Value);
-			
-			debug("-------------------------------------");
+			//debug("SELECTED TASK TO EXECUTE "+stringTask(p.Key)+ "HAS A SCORE OF "+p.Value);
+
+			//debug("-------------------------------------");
 			//Console.ReadKey();
 
 			return p.Key;
@@ -92,7 +101,7 @@ namespace SabberStoneCoreAi.src.Agent
 			if (after == null) { //There was an exception with the simullation function!
 				return 1; //better than END_TURN, just in case
 			}
-			
+
 				if (after.CurrentOpponent.Hero.Health <= 0)
 				{
 					debug("KILLING ENEMY!!!!!!!!");
@@ -103,7 +112,7 @@ namespace SabberStoneCoreAi.src.Agent
 					debug("WARNING: KILLING MYSELF!!!!!");
 					return Int32.MinValue;
 				}
-			
+
 
 			//Differences in Health
 			debug("CALCULATING ENEMY HEALTH SCORE");
@@ -113,7 +122,7 @@ namespace SabberStoneCoreAi.src.Agent
 			debug("Enemy points: " + enemyPoints + " My points: " + myPoints);
 
 			//Differences in Minions
-			debug("CALCULATING ENEMY MINIONS");			
+			debug("CALCULATING ENEMY MINIONS");
 			double scoreEnemyMinions = calculateScoreMinions(before.CurrentOpponent.BoardZone,after.CurrentOpponent.BoardZone);
 			debug("Score enemy minions: " +scoreEnemyMinions);
 			debug("CALCULATING MY MINIONS");
@@ -121,7 +130,7 @@ namespace SabberStoneCoreAi.src.Agent
 			debug("Score my minions: " + scoreMyMinions);
 
 			//Differences in Secrets
-			debug("CALCULATING SECRETS");			
+			debug("CALCULATING SECRETS");
 			double scoreEnemySecrets = calculateScoreSecretsRemoved(before.CurrentOpponent, after.CurrentOpponent);
 			double scoreMySecrets    = calculateScoreSecretsRemoved(before.CurrentPlayer, after.CurrentPlayer);
 
@@ -129,7 +138,7 @@ namespace SabberStoneCoreAi.src.Agent
 			//Difference in Mana
 			int usedMana = before.CurrentPlayer.RemainingMana - after.CurrentPlayer.RemainingMana;
 			double scoreManaUsed = usedMana * weights[MANA_REDUCED];
-			debug("Final task score" + enemyPoints + ",neg("+ myPoints + ")," + scoreEnemyMinions + ",neg(" + scoreMyMinions+"),S:"+ scoreEnemySecrets+"neg( " +scoreMySecrets+ ") M:neg(:"+scoreManaUsed+")");			
+			debug("Final task score" + enemyPoints + ",neg("+ myPoints + ")," + scoreEnemyMinions + ",neg(" + scoreMyMinions+"),S:"+ scoreEnemySecrets+"neg( " +scoreMySecrets+ ") M:neg(:"+scoreManaUsed+")");
 			return enemyPoints - myPoints + scoreEnemyMinions - scoreMyMinions+ scoreEnemySecrets - scoreMySecrets - scoreManaUsed;
 		}
 
@@ -172,7 +181,7 @@ namespace SabberStoneCoreAi.src.Agent
 						scoreHealthReduced = scoreHealthReduced + weights[MINION_HEALTH_REDUCED]*(mb.Health - ma.Health)*scoreMinion(mb); //Positive points if health is reduced
 						scoreAttackReduced = scoreAttackReduced + weights[MINION_ATTACK_REDUCED]*(mb.AttackDamage - ma.AttackDamage)*scoreMinion(mb); //Positive points if attack is reduced
 						survived = true;
-						
+
 					}
 				}
 
@@ -226,7 +235,7 @@ namespace SabberStoneCoreAi.src.Agent
 				score = score + weights[M_HAS_CHARGE];
 			if (m.HasDeathrattle)
 				score = score + weights[M_HAS_DEAHTRATTLE];
-			if (m.HasDivineShield) 
+			if (m.HasDivineShield)
 				score = score + weights[M_HAS_DIVINE_SHIELD];
 			if (m.HasInspire)
 				score = score + weights[M_HAS_INSPIRE];
@@ -237,7 +246,7 @@ namespace SabberStoneCoreAi.src.Agent
 			if (m.HasWindfury)
 				score = score + weights[M_HAS_WINDFURY];
 
-			
+
 
 			score = score + m.Card.Cost*weights[M_MANA_COST];
 			score = score + rarityToInt(m.Card) * weights[M_RARITY];
@@ -278,7 +287,7 @@ namespace SabberStoneCoreAi.src.Agent
 			List<PlayerTask> list  = state.CurrentPlayer.Options();
 			foreach (PlayerTask t in list) {
 				debug("---->POSSIBLE "+stringTask(t));
-				
+
 				double score = 0;
 				POGame.POGame before = state;
 				if (t.PlayerTaskType == PlayerTaskType.END_TURN)
@@ -293,8 +302,8 @@ namespace SabberStoneCoreAi.src.Agent
 					//Console.WriteLine("SIMULATION COMPLETE");
 					POGame.POGame nextState = simulated[t];
 					score = scoreTask(state, nextState); //Warning: if using tree, avoid overflow with max values!
-					
-					
+
+
 				}
 				debug("SCORE " + score);
 				if (score >= bestScore)
@@ -311,7 +320,7 @@ namespace SabberStoneCoreAi.src.Agent
 		public override void InitializeAgent()
 		{
 			debug("INITIALIZING AGENT (ONLY ONCE)");
-			
+
 
 		}
 
@@ -358,7 +367,7 @@ namespace SabberStoneCoreAi.src.Agent
 		}
 		public override void InitializeGame()
 		{
-			
+
 		}
 
 		private string stringTask(PlayerTask task) {
@@ -375,8 +384,9 @@ namespace SabberStoneCoreAi.src.Agent
 		}
 
 		private void debug(string line) {
-			if(false)
-				Console.WriteLine(line);
+			Console.WriteLine(line);
+//			if(false)
+//				Console.WriteLine(line);
 		}
 	}
 }
