@@ -40,6 +40,8 @@ namespace SabberStoneCoreAi.POGame
 
 		public bool PlayGame(bool addToGameStats=true)
 		{
+			Console.WriteLine("----- NEW GAME STARTING! -----");
+
 			Game game = new Game(gameConfig, setupHeroes);
 			player1.InitializeGame();
 			player2.InitializeGame();
@@ -49,7 +51,7 @@ namespace SabberStoneCoreAi.POGame
 			POGame poGame;
 			PlayerTask playertask = null;
 			Stopwatch[] watches = new[] {new Stopwatch(), new Stopwatch()};
-			
+
 			game.StartGame();
 			try
 			{
