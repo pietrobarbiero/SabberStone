@@ -34,7 +34,31 @@ namespace SabberStoneCoreAi.Agent
 
 		public override void InitializeGame() { }
 
-		public AlvaroAgent() { }
+		//public AlvaroAgent() { }
+
+		public AlvaroAgent()
+		{
+			EXPLORE_CONSTANT = 2;
+			MAX_TIME = 1000;
+			SELECTION_ACTION_METHOD = "MaxVictoriesOverVisited";
+			SCORE_IMPORTANCE = 10;
+			TREE_POLICY = "UCB1";
+			TREE_MAXIMUM_DEPTH = 1;
+			SIMULATION_POLICY = "GreedyPolicy";
+			CHILDREN_CONSIDERED_SIMULATING = 1.0;
+			ESTIMATION_MODE = "LinearEstimation";
+			NUM_SIMULATIONS = 1;
+
+			greedyAgent = new ParametricGreedyAgent("0.569460712743" + "#" + "0.958111820041" + "#" + "0.0689492467097" + "#" + "0.0" + "#" +
+				"0.843573987219" + "#" + "0.700225423688" + "#" + "0.907680353441" + "#" + "0.0" + "#" + "0.993682660717" + "#" +
+				"1.0" + "#" + "0.640753949511" + "#" + "0.992872512338" + "#" + "0.92870036875" + "#" + "0.168100484322" + "#" +
+				"0.870080107454" + "#" + "0.0" + "#" + "0.42897762808" + "#" + "1.0" + "#" + "0.0" + "#" + "0.583884736646" + "#" + "0.0");
+
+			Estimator.setWeights(0.7f, 0.4f, 0.4f, 0.9f, 0.4f, 0.01f, 0.02f, 0.4f, 0.3f, 0.8f, 0.5f, 0.4f, 0.5f, float.Parse("0.640753949511"), float.Parse("0.992872512338"), float.Parse("0.92870036875"),
+				float.Parse("0.168100484322"), float.Parse("0.870080107454"), float.Parse("0.42897762808"), float.Parse("1.0"));
+
+		}
+		
 
 		public AlvaroAgent(double exploreConstant, int maxTime, string selectionAction, double scoreImportance, string treePolicy, int treeMaximumDepth,
 						   string simulationPolicy, double childrenConsideredSimulating, string estimationMode, int numSimulations,
