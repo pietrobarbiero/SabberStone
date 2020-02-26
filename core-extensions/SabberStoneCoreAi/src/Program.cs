@@ -101,10 +101,15 @@ namespace SabberStoneCoreAi
 			GameConfig gameConfig = gameConfigCoevoluationary(args);
 
 			Console.WriteLine("Setup POGameHandler");
-			AbstractAgent player1agent = new ParametricGreedyAgent();
-			((ParametricGreedyAgent)player1agent).setAgeintWeightsFromString(args[2]);
-			AbstractAgent player2agent = new ParametricGreedyAgent();
-			((ParametricGreedyAgent)player2agent).setAgeintWeightsFromString(args[5]);
+			//AbstractAgent player1agent = new ParametricGreedyAgent();
+			//((ParametricGreedyAgent)player1agent).setAgeintWeightsFromString(args[2]);
+			Console.WriteLine("Attempting to istantiate EVA agent...");
+			AbstractAgent player1agent = new EVA();
+			((EVA)player1agent).InitializeAgent();
+			//AbstractAgent player2agent = new ParametricGreedyAgent();
+			//((ParametricGreedyAgent)player2agent).setAgeintWeightsFromString(args[5]);
+			AbstractAgent player2agent = new EVA();
+			((EVA)player2agent).InitializeAgent();
 			POGameHandler gameHandler = new POGameHandler(gameConfig, player1agent, player2agent, debug:false);
 			gameConfig.StartPlayer = -1; //Pick random start player
 
