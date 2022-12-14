@@ -33,14 +33,14 @@ for f, filename in enumerate(files):
 
 print df_weights
 
-axes_battlefield = df_weights.boxplot(column=["HHR", "HAR", "BMHR", "BMAR", "BMA", "BMK", "BSR", "BMR"])
+"""axes_battlefield = df_weights.boxplot(column=["HHR", "HAR", "BMHR", "BMAR", "BMA", "BMK", "BSR", "BMR"])
 axes_battlefield.set_ylabel("Weight")
 fig_battlefield = axes_battlefield.get_figure()
-fig_battlefield.savefig("weights_battlefield.png")
-"""
+fig_battlefield.savefig("weights_battlefield.png",dpi=1200)"""
+
 axes_minions = df_weights.boxplot(column=["MH", "MA", "MHC", "MHD", "MHDS", "MHI", "MHLS", "MHS", "MHT", "MHW", "MHP", "MR", "MM"]) #MHP has changed the position!
 axes_minions.set_ylabel("Weight")
 fig_minions = axes_minions.get_figure()
-fig_minions.savefig("weights_minions.png")
-"""
+fig_minions.savefig("weights_minions.png",dpi=1200)
+
 
