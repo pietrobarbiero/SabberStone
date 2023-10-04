@@ -43,12 +43,12 @@ class Command(object):
 		thread.join(timeout)
 		#print "EXIT WITH CODE "+str(self.process.returncode)
 		if thread.is_alive():
-			print 'Terminating process'
+			print('Terminating process')
 
 			#self.process.terminate()
 			os.killpg(os.getpgid(self.process.pid), signal.SIGTERM)
 			thread.join()
-			print "Game lasted a lot :/"
+			print("Game lasted a lot :/")
 			return False
 		return True
 
@@ -180,13 +180,13 @@ def launch_simulator(f1, f2, d1, d2, thread_id,temp_file_name):
 		command_line = "dotnet run --project /home/pgarcia/code/PARALLEL_HS/SabberStone"+thread_id+"/core-extensions/SabberStoneCoreAi/SabberStoneCoreAi.csproj"
 		command_line += " {0} {1} {2} {3} {4} {5} {6} {7}".format(d1,HERO_BY_DECK[d1],cml1,d2,HERO_BY_DECK[d2],cml2,NUM_GAMES," > "+file_name)
 
-	if DEBUG:print "\t\t"+command_line
+	if DEBUG:print("\t\t"+command_line)
 	com = Command(command_line)
 
 	attempts = 0
 	finished = False
 	while not finished:
-		print "Launching attempt " + str(attempts)
+		print("Launching attempt " + str(attempts))
 		finished = com.run(100)  # 1200
 		attempts = attempts + 1
 		if attempts == 3:
@@ -194,7 +194,7 @@ def launch_simulator(f1, f2, d1, d2, thread_id,temp_file_name):
 
 
 	w1,w2, tw, tl, hw, hl = parse_file(file_name)
-	if DEBUG:print "\t\tNUMBERS ARE "+str(w1)+" "+str(w2)
+	if DEBUG:print ("\t\tNUMBERS ARE "+str(w1)+" "+str(w2))
 	return w1, w2, tw, tl, hw, hl
 
 def execute_simulator_in_thread(battle):
@@ -283,7 +283,7 @@ def evaluate_hearthstone(candidates, args):
 
 	battles_list = []
 	for i,f1 in enumerate(to_fight):
-		if DEBUG: print "INDIVIDUAL "+str(f1)
+		if DEBUG: print ("INDIVIDUAL "+str(f1))
 		for j,f2 in enumerate(to_fight):
 			for d1 in DECKS:
 				for d2 in DECKS:
@@ -377,7 +377,7 @@ def run_one(prng=None, display=False):
 		best = max(final_pop)
 		print('Best Solution: \n{0}'.format(str(best)))
 	time2 = time.time()
-	print 'TIME ELAPSED = '+str(time2 - time1)
+	print('TIME ELAPSED = '+str(time2 - time1))
 	return ea
 
 def main(prng=None, display=False):
