@@ -1,7 +1,8 @@
 from random import Random
 from random import randint
-import time
+
 import inspyred
+import time
 import os
 import subprocess, threading
 import sys
@@ -17,7 +18,7 @@ TEMP_FILE_NAME = "results.tmp"
 POP_SIZE = 10
 NUM_THREADS = 8
 MAX_EVALUATIONS = 1000
-TEST_DUMMY = False
+TEST_DUMMY = True #Esto evita lanzar el comando, solo usar para depurar
 
 
 lock = threading.Lock()
@@ -176,6 +177,8 @@ def launch_simulator(f1, f2, d1, d2, thread_id,temp_file_name):
 		hl = randint(0,5*NUM_GAMES)
 		time.sleep(randint(0,0))
 		command_line = "echo {0} {1} {2} {3} {4} {5} {6} > {7} ".format(w1,w2,NUM_GAMES,tw,tl,hw,hl,file_name)
+		print("echo ESTO NO SE EJECUTA dotnet run --project /home/pgarcia/code/PARALLEL_HS/SabberStone"+thread_id+"/core-extensions/SabberStoneCoreAi/SabberStoneCoreAi.csproj")
+		print("echo {0} {1} {2} {3} {4} {5} {6} {7}".format(d1,HERO_BY_DECK[d1],cml1,d2,HERO_BY_DECK[d2],cml2,NUM_GAMES," > "+file_name))
 	else:
 		command_line = "dotnet run --project /home/pgarcia/code/PARALLEL_HS/SabberStone"+thread_id+"/core-extensions/SabberStoneCoreAi/SabberStoneCoreAi.csproj"
 		command_line += " {0} {1} {2} {3} {4} {5} {6} {7}".format(d1,HERO_BY_DECK[d1],cml1,d2,HERO_BY_DECK[d2],cml2,NUM_GAMES," > "+file_name)
@@ -363,7 +366,7 @@ def run_one(prng=None, display=False):
 	time1 = time.time()
 	ea = inspyred.ec.ES(prng)
 	ea.terminator = [inspyred.ec.terminators.evaluation_termination] #inspyred.ec.terminators.diversity_termination
-
+	
 	ea.observer = [inspyred.ec.observers.stats_observer, my_file_observer]
 	final_pop = ea.evolve(generator=generate_weights,
 						  num_weights = NUM_WEIGHTS,
